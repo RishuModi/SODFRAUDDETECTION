@@ -220,12 +220,22 @@ void debugPrintMappings() {
 int main() {
     cout << "🔄 Loading CSV data...\n";
 
-    loadCSVData("XX_3_USER_ROLE_MAPPING_RPT.csv", userToRoles, 0, 1);
-    loadCSVData("XX_6_PVLG_TO_ROLE_RELATION_RPT.csv", roleToPrivileges, 0, 1);
-    loadCSVData("XX_7_PVLGS_MASTER_RPT.csv", privilegeToEntity, 0, 1);
-    loadSODRules("SOD_Ruleset.csv");
-
-    debugPrintMappings();  // Print mappings before conflict check
+    loadCSVData("XX_3_USER_ROLE_MAPPING_CONFLICTS_CLEAN.csv", userToRoles, 0, 1);
+    loadCSVData("XX_6_PVLG_TO_ROLE_RELATION_CONFLICTS_CLEAN.csv", roleToPrivileges, 0, 1);
+    loadCSVData("XX_7_PVLGS_MASTER_RPT_filtered (1).csv", privilegeToEntity, 0, 1);
+    loadSODRules("SOD_Ruleset_EXPANDED.csv");
+    cout << "\n📌 DEBUG: All Privilege-to-Entity Mappings\n";
+    for (const auto& entry : privilegeToEntity) {
+    cout << "Privilege: " << entry.first << " -> Entity: " << entry.second << endl;
+    }
+    cout << "\n📌 DEBUG: Privileges without entity mappings\n";
+    for (const auto& entry : roleToPrivileges) {
+        for (const string& privilege : entry.second) {
+            if (privilegeToEntity.find(privilege) == privilegeToEntity.end()) {
+                cout << "Missing: " << privilege << endl;
+            }
+        }
+    }
 
     detectConflicts();
     writeResultsToCSV("conflict_results.csv");
